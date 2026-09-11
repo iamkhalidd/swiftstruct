@@ -1,0 +1,217 @@
+// Prisma schema for SwiftStruct Limited Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum PropertyStatus {
+  DRAFT
+  PUBLISHED
+  AVAILABLE
+  RESERVED
+  SOLD
+  RENTED
+  ARCHIVED
+}
+
+enum ProjectStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  ARCHIVED
+}
+
+enum EnquiryType {
+  PROPERTY
+  PROJECT_BRIEF
+  CONSULTANCY
+  GENERAL
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      Role     @default(STAFF)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Property {
+  id            String         @id @default(uuid())
+  title         String
+  slug          String         @unique
+  reference     String         @unique
+  description   String
+  propertyType  String
+  listingType   ListingType
+  price         Float
+  currency      String         @default("NGN")
+  location      String
+  city          String
+  state         String
+  bedrooms      Int            @default(0)
+  bathrooms     Int            @default(0)
+  parkingSpaces Int            @default(0)
+  status        PropertyStatus @default(DRAFT)
+  isFeatured    Boolean        @default(false)
+  amenities     String?        // Stored as JSON or comma-separated list
+  features      String?        // Stored as JSON or comma-separated list
+  publishedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  images    PropertyImage[]
+  enquiries Enquiry[]
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  publicId   String?
+  caption    String?
+  isPrimary  Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model Project {
+  id              String        @id @default(uuid())
+  name            String
+  slug            String        @unique
+  reference       String        @unique
+  description     String
+  location        String
+  projectType     String
+  status          ProjectStatus @default(UPCOMING)
+  scope           String?       // JSON string or summary
+  services        String?       // JSON string or list
+  progressPercent Int           @default(0)
+  startDate       DateTime?
+  completionDate  DateTime?
+  isFeatured      Boolean       @default(false)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  images    ProjectImage[]
+  enquiries Enquiry[]
+}
+
+model ProjectImage {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String?
+  caption   String?
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  shortDescription String
+  content          String
+  imageUrl         String?
+  features         String?  // JSON string or comma-separated list
+  isPublished      Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  enquiries Enquiry[]
+}
+
+model Enquiry {
+  id                String        @id @default(uuid())
+  type              EnquiryType
+  name              String
+  email             String
+  phone             String
+  subject           String?
+  message           String
+  budget            String?
+  projectType       String?
+  location          String?
+  serviceRequested  String?
+  status            EnquiryStatus @default(NEW)
+
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+
+  projectId  String?
+  project    Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  serviceId  String?
+  service    Service?  @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Insight {
+  id            String    @id @default(uuid())
+  title         String
+  slug          String    @unique
+  excerpt       String
+  content       String
+  featuredImage String?
+  category      String
+  author        String
+  isPublished   Boolean   @default(true)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Testimonial {
+  id            String   @id @default(uuid())
+  clientName    String
+  companyOrRole String?
+  testimonial   String
+  avatarUrl     String?
+  isPublished   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Media {
+  id        String   @id @default(uuid())
+  filename  String
+  url       String
+  publicId  String   @unique
+  format    String
+  bytes     Int
+  folder    String?
+  createdAt DateTime @default(now())
+}
