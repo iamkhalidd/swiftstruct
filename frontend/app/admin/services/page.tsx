@@ -100,7 +100,7 @@ export default function AdminServicesPage() {
                 >
                   {srv.isPublished === false ? 'Draft' : 'Active Pillar'}
                 </span>
-                <span className="text-xs font-mono text-slate-400">/{srv.slug}</span>
+                <span className="text-xs font-mono text-slate-500">/{srv.slug}</span>
               </div>
 
               <h3 className="font-bold text-slate-900 text-lg">{srv.name}</h3>
@@ -178,7 +178,7 @@ export default function AdminServicesPage() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Features <span className="font-medium text-slate-400">(comma separated)</span>
+                  Features <span className="font-medium text-slate-500">(comma separated)</span>
                 </label>
                 <input
                   type="text"

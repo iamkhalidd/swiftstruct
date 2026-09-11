@@ -68,7 +68,7 @@ export default function ImageGalleryUpload({
   return (
     <div>
       <label className="block text-xs font-bold text-slate-700 mb-1">
-        {label} <span className="font-medium text-slate-400">({images.length} uploaded)</span>
+        {label} <span className="font-medium text-slate-500">({images.length} uploaded)</span>
       </label>
 
       <input
@@ -86,7 +86,11 @@ export default function ImageGalleryUpload({
             key={`${img.publicId ?? img.url}-${index}`}
             className="relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50"
           >
-            <img src={img.url} alt="" className="w-full h-24 object-cover" />
+            <img
+              src={img.url}
+              alt={img.caption || 'Uploaded image preview'}
+              className="w-full h-24 object-cover"
+            />
 
             {img.isPrimary && (
               <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-blue-600 text-white text-[9px] font-extrabold uppercase rounded">
@@ -99,19 +103,21 @@ export default function ImageGalleryUpload({
                 <button
                   type="button"
                   onClick={() => makePrimary(index)}
+                  aria-label={`Make image ${index + 1} the primary image`}
                   title="Make primary"
-                  className="p-1 text-white hover:text-blue-300"
+                  className="p-2 text-white hover:text-blue-300"
                 >
-                  <Star className="w-3.5 h-3.5" />
+                  <Star className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => removeAt(index)}
+                aria-label={`Remove image ${index + 1}`}
                 title="Remove"
-                className="p-1 text-white hover:text-red-400 ml-auto"
+                className="p-2 text-white hover:text-red-400 ml-auto"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>

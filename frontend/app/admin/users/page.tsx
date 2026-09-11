@@ -143,7 +143,7 @@ export default function AdminUsersPage() {
                       {usr.email !== 'admin@swiftstruct.com' && (
                         <button
                           onClick={() => handleDeleteUser(usr.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 transition"
+                          className="p-2 text-slate-500 hover:text-red-600 transition"
                           title="Remove User"
                         >
                           <Trash2 className="w-4 h-4" />

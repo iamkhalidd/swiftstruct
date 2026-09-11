@@ -106,7 +106,7 @@ export default function AdminTestimonialsPage() {
                     <td className="p-4 text-right">
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 transition"
+                        className="p-2 text-slate-500 hover:text-red-600 transition"
                         title="Delete Testimonial"
                       >
                         <Trash2 className="w-4 h-4" />

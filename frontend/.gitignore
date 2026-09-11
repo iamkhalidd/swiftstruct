@@ -39,4 +39,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# vendored skill/reference material, not application code
+/anthropics-frontend-design/
+/github-web-design-reviewer/
+/nextlevelbuilder-ui-ux-pro-max/
 next-env.d.ts

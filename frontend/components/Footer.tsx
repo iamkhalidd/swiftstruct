@@ -85,7 +85,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/admin/login" className="text-slate-600 hover:text-slate-400 transition text-xs">
+              <Link href="/admin/login" className="text-slate-400 hover:text-slate-200 transition text-xs">
                 Admin Portal
               </Link>
             </li>

@@ -21,7 +21,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
       {/* Image Container */}
-      <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden">
+      <div className="relative aspect-16/10 bg-slate-100 overflow-hidden">
         <img
           src={primaryImage}
           alt={property.title}
@@ -81,7 +81,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         {/* Footer Price & Action */}
         <div className="flex items-center justify-between pt-1">
           <div>
-            <span className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Price</span>
+            <span className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider">Price</span>
             <span className="text-xl font-extrabold text-slate-900">{formattedPrice}</span>
           </div>
           <Link

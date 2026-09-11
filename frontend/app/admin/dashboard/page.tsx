@@ -72,7 +72,7 @@ export default function AdminDashboardPage() {
             <Home className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Properties</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Properties</span>
             <span className="text-2xl font-black text-slate-900 block">{propertiesCount}</span>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
             <HardHat className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Projects</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Projects</span>
             <span className="text-2xl font-black text-slate-900 block">{activeProjectsCount}</span>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Completed Projects</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Completed Projects</span>
             <span className="text-2xl font-black text-slate-900 block">{completedProjectsCount}</span>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
             <Inbox className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">New Enquiries</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">New Enquiries</span>
             <span className="text-2xl font-black text-slate-900 block">{newEnquiriesCount}</span>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="p-4">
                       <div>{enq.email}</div>
-                      <div className="text-slate-400 text-[11px]">{enq.phone}</div>
+                      <div className="text-slate-500 text-[11px]">{enq.phone}</div>
                     </td>
                     <td className="p-4 max-w-xs truncate">{enq.subject || enq.message}</td>
                     <td className="p-4">
@@ -167,7 +167,7 @@ export default function AdminDashboardPage() {
                         {enq.status}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-400 text-[11px]">
+                    <td className="p-4 text-slate-500 text-[11px]">
                       {new Date(enq.createdAt).toLocaleDateString()}
                     </td>
                   </tr>

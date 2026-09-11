@@ -102,7 +102,12 @@ export default function AdminMediaPage() {
               key={asset.publicId}
               className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
             >
-              <img src={asset.url} alt="" className="w-full h-36 object-cover bg-slate-50" />
+              <img
+                src={asset.url}
+                alt={asset.publicId.split('/').pop() || 'Cloudinary asset'}
+                loading="lazy"
+                className="w-full h-36 object-cover bg-slate-50"
+              />
               <div className="p-3 space-y-1">
                 <p className="text-[11px] font-bold text-slate-900 truncate" title={asset.publicId}>
                   {asset.publicId.split('/').pop()}

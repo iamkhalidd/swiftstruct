@@ -52,7 +52,7 @@ export default function ImageUpload({ label = 'Image', value, onChange }: ImageU
         <div className="flex items-center gap-3">
           <img
             src={value}
-            alt=""
+            alt="Current image preview"
             className="w-16 h-16 rounded-lg object-cover border border-slate-200 bg-slate-50"
           />
           <div className="flex gap-2">
