@@ -9,6 +9,7 @@ build/
 coverage/
 **/coverage/
 *.log
+*.tsbuildinfo
 .env
 .env.*
 !.env.example

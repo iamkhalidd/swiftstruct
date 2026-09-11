@@ -6,7 +6,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   user: any = null;
   property: any = null;
+  propertyImage: any = null;
   project: any = null;
+  projectImage: any = null;
   service: any = null;
   enquiry: any = null;
   insight: any = null;
@@ -22,7 +24,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
         await client.$connect();
         this.user = client.user;
         this.property = client.property;
+        this.propertyImage = client.propertyImage;
         this.project = client.project;
+        this.projectImage = client.projectImage;
         this.service = client.service;
         this.enquiry = client.enquiry;
         this.insight = client.insight;
