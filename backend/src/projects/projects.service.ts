@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
 import { UpdateProjectDto } from './dto/update-project.dto.js';
+import { CreateProjectUpdateDto } from './dto/create-project-update.dto.js';
 import { ProjectQueryDto } from './dto/project-query.dto.js';
 import { ProjectStatus } from '../common/types/prisma-enums.js';
 
@@ -49,6 +50,26 @@ export const INITIAL_PROJECTS = [
     updatedAt: new Date(),
     images: [
       { id: 'pimg-2-1', url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80', isPrimary: true, caption: 'Elevation Rendering' },
+    ],
+    updates: [
+      {
+        id: 'pupd-2-2',
+        projectId: 'proj-2',
+        title: 'Curtain wall glazing 70% installed',
+        description: 'Structural glazing to floors 4-7 completed. Floors 8-10 scheduled for next week, weather permitting.',
+        imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80',
+        progressPercent: 65,
+        createdAt: new Date('2025-03-18'),
+      },
+      {
+        id: 'pupd-2-1',
+        projectId: 'proj-2',
+        title: 'Superstructure topped out',
+        description: 'Final concrete pour on the 10th floor slab completed. MEP first fix commencing across all levels.',
+        imageUrl: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80',
+        progressPercent: 45,
+        createdAt: new Date('2025-01-22'),
+      },
     ],
   },
   {
@@ -186,7 +207,10 @@ export class ProjectsService {
           where: {
             OR: [{ slug }, { id: slug }],
           },
-          include: { images: true },
+          include: {
+            images: true,
+            updates: { orderBy: { createdAt: 'desc' } },
+          },
         });
         if (project) return project;
       } catch (err) {
@@ -198,7 +222,7 @@ export class ProjectsService {
     if (!found) {
       throw new NotFoundException(`Project with slug or ID "${slug}" not found`);
     }
-    return found;
+    return { ...found, updates: found.updates ?? [] };
   }
 
   async create(dto: CreateProjectDto) {
@@ -252,6 +276,7 @@ export class ProjectsService {
       createdAt: new Date(),
       updatedAt: new Date(),
       images: dto.images ? dto.images.map((img, i) => ({ id: `pimg-${Date.now()}-${i}`, ...img })) : [],
+      updates: [],
     };
     this.memoryProjects.unshift(newProject);
     return newProject;
@@ -314,5 +339,115 @@ export class ProjectsService {
       this.memoryProjects.splice(index, 1);
     }
     return { message: 'Project deleted successfully' };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Progress updates (site photos + milestone notes posted as work advances)
+  // ---------------------------------------------------------------------------
+
+  async listUpdates(projectId: string) {
+    if (this.prisma.project) {
+      try {
+        return await this.prisma.projectUpdate.findMany({
+          where: { projectId },
+          orderBy: { createdAt: 'desc' },
+        });
+      } catch (err) {
+        this.logger.warn('Database error in project listUpdates', err);
+      }
+    }
+
+    const project = this.memoryProjects.find(
+      (p) => p.id === projectId || p.slug === projectId,
+    );
+    return project?.updates ?? [];
+  }
+
+  /**
+   * Posts a progress update. When the update carries a `progressPercent` the
+   * parent project's own percentage is rolled forward in the same transaction,
+   * so the portfolio card can never drift out of sync with the latest update.
+   */
+  async addUpdate(projectId: string, dto: CreateProjectUpdateDto) {
+    if (this.prisma.project) {
+      try {
+        return await this.prisma.$transaction(async (tx) => {
+          const created = await tx.projectUpdate.create({
+            data: {
+              projectId,
+              title: dto.title,
+              description: dto.description,
+              imageUrl: dto.imageUrl,
+              publicId: dto.publicId,
+              progressPercent: dto.progressPercent,
+            },
+          });
+
+          if (dto.progressPercent !== undefined) {
+            await tx.project.update({
+              where: { id: projectId },
+              data: { progressPercent: dto.progressPercent },
+            });
+          }
+
+          return created;
+        });
+      } catch (err) {
+        this.logger.warn('Database error in project addUpdate', err);
+      }
+    }
+
+    const project = this.memoryProjects.find(
+      (p) => p.id === projectId || p.slug === projectId,
+    );
+    if (!project) {
+      throw new NotFoundException(`Project with ID "${projectId}" not found`);
+    }
+
+    const update = {
+      id: `pupd-${Date.now()}`,
+      projectId: project.id,
+      title: dto.title,
+      description: dto.description ?? null,
+      imageUrl: dto.imageUrl ?? null,
+      publicId: dto.publicId ?? null,
+      progressPercent: dto.progressPercent ?? null,
+      createdAt: new Date(),
+    };
+
+    project.updates = [update, ...(project.updates ?? [])];
+    if (dto.progressPercent !== undefined) {
+      project.progressPercent = dto.progressPercent;
+    }
+    project.updatedAt = new Date();
+
+    return update;
+  }
+
+  async removeUpdate(projectId: string, updateId: string) {
+    if (this.prisma.project) {
+      try {
+        // Scoped by projectId so an update can never be deleted through the
+        // wrong project's route.
+        const { count } = await this.prisma.projectUpdate.deleteMany({
+          where: { id: updateId, projectId },
+        });
+        if (count === 0) {
+          throw new NotFoundException(`Project update "${updateId}" not found`);
+        }
+        return { message: 'Project update deleted successfully' };
+      } catch (err) {
+        if (err instanceof NotFoundException) throw err;
+        this.logger.warn('Database error in project removeUpdate', err);
+      }
+    }
+
+    const project = this.memoryProjects.find(
+      (p) => p.id === projectId || p.slug === projectId,
+    );
+    if (project) {
+      project.updates = (project.updates ?? []).filter((u: any) => u.id !== updateId);
+    }
+    return { message: 'Project update deleted successfully' };
   }
 }

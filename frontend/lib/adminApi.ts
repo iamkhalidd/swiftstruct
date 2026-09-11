@@ -145,6 +145,29 @@ export const adminApi = {
         method: 'DELETE',
       });
     },
+    getUpdates: async (projectId: string) => {
+      return adminFetcher<any[]>(`/projects/${projectId}/updates`);
+    },
+    addUpdate: async (
+      projectId: string,
+      data: {
+        title: string;
+        description?: string;
+        imageUrl?: string;
+        publicId?: string;
+        progressPercent?: number;
+      },
+    ) => {
+      return adminFetcher<any>(`/projects/${projectId}/updates`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteUpdate: async (projectId: string, updateId: string) => {
+      return adminFetcher<any>(`/projects/${projectId}/updates/${updateId}`, {
+        method: 'DELETE',
+      });
+    },
   },
   enquiries: {
     getAll: async () => {

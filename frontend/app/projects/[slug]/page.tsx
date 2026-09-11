@@ -165,6 +165,54 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
                 </div>
               </div>
             )}
+
+            {/* Construction Progress Timeline */}
+            {project.updates && project.updates.length > 0 && (
+              <div className="bg-white p-8 rounded-2xl border border-neutral-200 shadow-sm space-y-6">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold uppercase tracking-widest text-neutral-500">Site Milestones</span>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-900">Construction Progress Timeline</h2>
+                </div>
+
+                <ol className="relative border-l border-neutral-200 space-y-8 pl-6">
+                  {project.updates.map((u) => (
+                    <li key={u.id} className="relative">
+                      <span
+                        aria-hidden="true"
+                        className="absolute -left-[30px] top-1.5 h-3 w-3 rounded-full bg-black ring-4 ring-white"
+                      />
+                      <article className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <time dateTime={u.createdAt} className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                            {new Date(u.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </time>
+                          {typeof u.progressPercent === 'number' && (
+                            <span className="px-2 py-0.5 bg-neutral-100 border border-neutral-200 text-neutral-800 text-[10px] font-bold uppercase tracking-wider rounded-md">
+                              {u.progressPercent}% complete
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="text-base font-bold text-neutral-900">{u.title}</h3>
+
+                        {u.description && (
+                          <p className="text-sm text-neutral-600 leading-relaxed whitespace-pre-line">{u.description}</p>
+                        )}
+
+                        {u.imageUrl && (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={u.imageUrl}
+                            alt={u.title}
+                            className="w-full max-h-72 rounded-xl border border-neutral-200 object-cover"
+                          />
+                        )}
+                      </article>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </div>
 
           {/* Side Info & Lead CTA */}

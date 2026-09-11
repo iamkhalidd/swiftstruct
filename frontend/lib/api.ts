@@ -27,6 +27,9 @@ export interface Property {
   parkingSpaces: number;
   status: string;
   isFeatured: boolean;
+  /** Unit inventory. A standalone house is 1 of 1; a block listing can be many. */
+  totalUnits: number;
+  availableUnits: number;
   amenities?: string;
   features?: string;
   publishedAt?: string;
@@ -50,6 +53,18 @@ export interface Project {
   isFeatured: boolean;
   publishedAt?: string;
   images: { id: string; url: string; caption?: string; isPrimary?: boolean }[];
+  /** Dated progress entries posted by the delivery team, newest first. */
+  updates?: ProjectUpdate[];
+}
+
+export interface ProjectUpdate {
+  id: string;
+  title: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  /** Overall completion at the time the update was posted. */
+  progressPercent?: number | null;
+  createdAt: string;
 }
 
 export interface ServiceItem {

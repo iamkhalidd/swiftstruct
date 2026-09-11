@@ -9,11 +9,26 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   propertyImage: any = null;
   project: any = null;
   projectImage: any = null;
+  projectUpdate: any = null;
   service: any = null;
   enquiry: any = null;
   insight: any = null;
   testimonial: any = null;
   media: any = null;
+
+  /** Raw client, kept so callers can run multi-write transactions. */
+  private client: any = null;
+
+  /**
+   * Passthrough to Prisma's interactive transaction. Throws when the client is
+   * not connected, which lets callers fall back to their in-memory store.
+   */
+  async $transaction<T>(fn: (tx: any) => Promise<T>): Promise<T> {
+    if (!this.client) {
+      throw new Error('Prisma client not connected');
+    }
+    return this.client.$transaction(fn);
+  }
 
   async onModuleInit() {
     try {
@@ -22,11 +37,13 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       if (PrismaClientClass) {
         const client = new PrismaClientClass();
         await client.$connect();
+        this.client = client;
         this.user = client.user;
         this.property = client.property;
         this.propertyImage = client.propertyImage;
         this.project = client.project;
         this.projectImage = client.projectImage;
+        this.projectUpdate = client.projectUpdate;
         this.service = client.service;
         this.enquiry = client.enquiry;
         this.insight = client.insight;

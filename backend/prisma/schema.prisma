@@ -80,6 +80,13 @@ model Property {
   parkingSpaces Int            @default(0)
   status        PropertyStatus @default(DRAFT)
   isFeatured    Boolean        @default(false)
+
+  // Unit inventory. A standalone house is 1 of 1; a block or estate listing
+  // can be many. `availableUnits` is what remains, so the public site can show
+  // "3 of 12 units available" without recomputing anything.
+  totalUnits     Int @default(1)
+  availableUnits Int @default(1)
+
   amenities     String?        // Stored as JSON or comma-separated list
   features      String?        // Stored as JSON or comma-separated list
   publishedAt   DateTime?
@@ -122,7 +129,26 @@ model Project {
   updatedAt       DateTime      @updatedAt
 
   images    ProjectImage[]
+  updates   ProjectUpdate[]
   enquiries Enquiry[]
+}
+
+/// A dated progress entry on a project — lets the delivery team post site
+/// photos and milestone notes as work advances, which the public project page
+/// renders as a timeline for clients to follow.
+model ProjectUpdate {
+  id              String      @id @default(uuid())
+  projectId       String
+  project         Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  imageUrl        String?
+  publicId        String?
+  progressPercent Int?        // Snapshot of overall progress at the time of posting
+  createdBy       String?
+  createdAt       DateTime    @default(now())
+
+  @@index([projectId, createdAt])
 }
 
 model ProjectImage {

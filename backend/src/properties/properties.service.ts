@@ -24,6 +24,8 @@ export const INITIAL_PROPERTIES = [
     parkingSpaces: 3,
     status: PropertyStatus.AVAILABLE,
     isFeatured: true,
+    totalUnits: 1,
+    availableUnits: 1,
     amenities: 'Swimming Pool, 24/7 Security, Smart Home Automation, Fitted Kitchen, CCTV, Balcony, Water Treatment',
     features: 'High Ceilings, Premium Marble Flooring, En-suite Bedrooms, Walk-in Closet, Generator House',
     publishedAt: new Date(),
@@ -52,6 +54,8 @@ export const INITIAL_PROPERTIES = [
     parkingSpaces: 2,
     status: PropertyStatus.AVAILABLE,
     isFeatured: true,
+    totalUnits: 24,
+    availableUnits: 6,
     amenities: 'Ocean View, Elevator, Gym, Swimming Pool, Concierge Service, Underground Parking',
     features: 'Floor to Ceiling Windows, Fitted Italian Kitchen, Centralized Air Conditioning',
     publishedAt: new Date(),
@@ -80,6 +84,8 @@ export const INITIAL_PROPERTIES = [
     parkingSpaces: 10,
     status: PropertyStatus.AVAILABLE,
     isFeatured: false,
+    totalUnits: 12,
+    availableUnits: 4,
     amenities: 'Fiber Optic Internet Ready, Dedicated Substation, High Capacity Generator, 24/7 Security',
     features: 'Flexible Layout, Executive Boardroom, Modern Washrooms, Kitchenette',
     publishedAt: new Date(),
@@ -107,6 +113,8 @@ export const INITIAL_PROPERTIES = [
     parkingSpaces: 6,
     status: PropertyStatus.AVAILABLE,
     isFeatured: true,
+    totalUnits: 1,
+    availableUnits: 1,
     amenities: 'Elevator, Private Cinema, Swimming Pool, Rooftop Lounge, 2-Room BQ, Underground Wine Cellar',
     features: 'Smart Home Automation, Double Volume Living Room, Chef Kitchen, Solar Power System',
     publishedAt: new Date(),
@@ -135,6 +143,25 @@ export class PropertiesService {
 
   private generateReference(): string {
     return `SS-PROP-${Math.floor(100 + Math.random() * 900)}`;
+  }
+
+  /**
+   * Keeps unit inventory coherent: `availableUnits` can never exceed
+   * `totalUnits`, and neither can go negative. Applied on both create and
+   * update so bad numbers can't reach the database from any caller.
+   */
+  private resolveUnits(
+    totalInput?: number,
+    availableInput?: number,
+    currentTotal = 1,
+    currentAvailable = 1,
+  ) {
+    const totalUnits = Math.max(1, totalInput ?? currentTotal);
+    const availableUnits = Math.max(
+      0,
+      Math.min(availableInput ?? currentAvailable, totalUnits),
+    );
+    return { totalUnits, availableUnits };
   }
 
   async findAll(query: PropertyQueryDto) {
@@ -252,6 +279,10 @@ export class PropertiesService {
   async create(dto: CreatePropertyDto) {
     const slug = this.generateSlug(dto.title);
     const reference = this.generateReference();
+    const { totalUnits, availableUnits } = this.resolveUnits(
+      dto.totalUnits,
+      dto.availableUnits,
+    );
 
     if (this.prisma.property) {
       try {
@@ -273,6 +304,8 @@ export class PropertiesService {
             parkingSpaces: dto.parkingSpaces,
             status: dto.status || PropertyStatus.AVAILABLE,
             isFeatured: dto.isFeatured || false,
+            totalUnits,
+            availableUnits,
             amenities: dto.amenities,
             features: dto.features,
             publishedAt: new Date(),
@@ -306,6 +339,8 @@ export class PropertiesService {
       parkingSpaces: dto.parkingSpaces,
       status: dto.status || PropertyStatus.AVAILABLE,
       isFeatured: dto.isFeatured || false,
+      totalUnits,
+      availableUnits,
       amenities: dto.amenities || '',
       features: dto.features || '',
       publishedAt: new Date(),
@@ -322,6 +357,22 @@ export class PropertiesService {
       try {
         const dataToUpdate: any = { ...dto };
         delete dataToUpdate.images;
+
+        if (dto.totalUnits !== undefined || dto.availableUnits !== undefined) {
+          const current = await this.prisma.property.findUnique({
+            where: { id },
+            select: { totalUnits: true, availableUnits: true },
+          });
+          Object.assign(
+            dataToUpdate,
+            this.resolveUnits(
+              dto.totalUnits,
+              dto.availableUnits,
+              current?.totalUnits ?? 1,
+              current?.availableUnits ?? 1,
+            ),
+          );
+        }
 
         if (dto.images && dto.images.length > 0) {
           await this.prisma.propertyImage.deleteMany({ where: { propertyId: id } });
@@ -349,9 +400,20 @@ export class PropertiesService {
       ? dto.images.map((img, i) => ({ id: `img-${Date.now()}-${i}`, ...img }))
       : existingImages;
 
+    const units =
+      dto.totalUnits !== undefined || dto.availableUnits !== undefined
+        ? this.resolveUnits(
+            dto.totalUnits,
+            dto.availableUnits,
+            this.memoryProperties[index].totalUnits ?? 1,
+            this.memoryProperties[index].availableUnits ?? 1,
+          )
+        : {};
+
     const updated = {
       ...this.memoryProperties[index],
       ...dto,
+      ...units,
       images: updatedImages,
       updatedAt: new Date(),
     };

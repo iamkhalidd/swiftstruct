@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsBoolean, Min, ValidateNested } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, IsBoolean, Min, ValidateNested } from 'class-validator';
 import { ListingType, PropertyStatus } from '../../common/types/prisma-enums.js';
 import { ImageDto } from '../../common/dto/image.dto.js';
 import { Type } from 'class-transformer';
@@ -58,6 +58,20 @@ export class CreatePropertyDto {
   @IsEnum(PropertyStatus)
   @IsOptional()
   status?: PropertyStatus;
+
+  /** How many units this listing covers. A standalone house is 1. */
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  @IsOptional()
+  totalUnits?: number;
+
+  /** How many of those units are still available. Cannot exceed totalUnits. */
+  @IsInt()
+  @Min(0)
+  @Type(() => Number)
+  @IsOptional()
+  availableUnits?: number;
 
   @IsBoolean()
   @IsOptional()

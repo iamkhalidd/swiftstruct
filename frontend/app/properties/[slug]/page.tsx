@@ -214,6 +214,25 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
                   <span className="text-[10px] text-neutral-500 uppercase">Parking</span>
                 </div>
               </div>
+
+              {/* Unit Availability */}
+              {property.totalUnits > 1 && (
+                <div className="border border-neutral-200 rounded-xl p-4 bg-neutral-50">
+                  {property.availableUnits > 0 ? (
+                    <>
+                      <span className="block text-sm font-bold text-neutral-900">
+                        {property.availableUnits} of {property.totalUnits} units available
+                      </span>
+                      <span className="block text-xs text-neutral-500 mt-0.5">Updated by the sales team</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="block text-sm font-bold text-red-600">All units taken</span>
+                      <span className="block text-xs text-neutral-500 mt-0.5">Updated by the sales team</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             <a

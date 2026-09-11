@@ -28,7 +28,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           alt={property.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute top-3 left-3 flex gap-2">
+        <div className="absolute top-3 left-3 flex flex-wrap gap-2">
           <span
             className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md text-white shadow-md ${
               property.listingType === 'SALE' ? 'bg-black' : 'bg-neutral-600'
@@ -41,6 +41,16 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               Featured
             </span>
           )}
+          {property.totalUnits > 1 &&
+            (property.availableUnits > 0 ? (
+              <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md text-neutral-900 bg-neutral-100 border border-neutral-300 shadow-md">
+                {property.availableUnits} of {property.totalUnits} units left
+              </span>
+            ) : (
+              <span className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md text-red-600 bg-white border border-neutral-300 shadow-md">
+                All units taken
+              </span>
+            ))}
         </div>
       </div>
 
