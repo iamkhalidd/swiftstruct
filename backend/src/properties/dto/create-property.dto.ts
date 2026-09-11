@@ -1,5 +1,6 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsBoolean, Min } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsBoolean, Min, ValidateNested } from 'class-validator';
 import { ListingType, PropertyStatus } from '../../common/types/prisma-enums.js';
+import { ImageDto } from '../../common/dto/image.dto.js';
 import { Type } from 'class-transformer';
 
 export class CreatePropertyDto {
@@ -71,5 +72,7 @@ export class CreatePropertyDto {
   features?: string;
 
   @IsOptional()
-  images?: { url: string; publicId?: string; caption?: string; isPrimary?: boolean }[];
+  @ValidateNested({ each: true })
+  @Type(() => ImageDto)
+  images?: ImageDto[];
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import ImageUpload from '@/components/ImageUpload';
 import { BookOpen, Plus, Trash2, X } from 'lucide-react';
 
 export default function AdminInsightsPage() {
@@ -16,7 +17,7 @@ export default function AdminInsightsPage() {
   const [author, setAuthor] = useState('SwiftStruct Editorial');
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
-  const [featuredImage, setFeaturedImage] = useState('https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80');
+  const [featuredImage, setFeaturedImage] = useState('');
 
   const loadArticles = async () => {
     setLoading(true);
@@ -180,12 +181,10 @@ export default function AdminInsightsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Featured Image URL</label>
-                <input
-                  type="url"
+                <ImageUpload
+                  label="Featured Image"
                   value={featuredImage}
-                  onChange={(e) => setFeaturedImage(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                  onChange={(url) => setFeaturedImage(url)}
                 />
               </div>
 

@@ -1,6 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
+import { createHash } from 'node:crypto';
+
+const FOLDER = 'swiftstruct';
 
 @Injectable()
 export class MediaService {
@@ -8,22 +11,41 @@ export class MediaService {
 
   constructor(private configService: ConfigService) {
     cloudinary.config({
-      cloud_name: this.configService.get<string>('CLOUDINARY_CLOUD_NAME') || 'swiftstruct',
-      api_key: this.configService.get<string>('CLOUDINARY_API_KEY') || '1234567890',
-      api_secret: this.configService.get<string>('CLOUDINARY_API_SECRET') || 'secret',
+      cloud_name: this.configService.get<string>('CLOUDINARY_CLOUD_NAME'),
+      api_key: this.configService.get<string>('CLOUDINARY_API_KEY'),
+      api_secret: this.configService.get<string>('CLOUDINARY_API_SECRET'),
     });
   }
 
-  async getSignature() {
-    const timestamp = Math.round(new Date().getTime() / 1000);
-    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME') || 'swiftstruct';
-    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY') || '1234567890';
+  /**
+   * Issues the parameters the browser needs to upload a file straight to
+   * Cloudinary. The api_secret never leaves the server — only the resulting
+   * signature is returned.
+   */
+  getSignature() {
+    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
+    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
+    const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
 
-    return {
-      timestamp,
-      cloudName,
-      apiKey,
-      folder: 'swiftstruct',
-    };
+    if (!cloudName || !apiKey || !apiSecret) {
+      this.logger.error('Cloudinary credentials are missing; image uploads are unavailable.');
+      throw new ServiceUnavailableException(
+        'Image uploads are not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET.',
+      );
+    }
+
+    const timestamp = Math.round(Date.now() / 1000);
+    const params: Record<string, string | number> = { folder: FOLDER, timestamp };
+
+    // Cloudinary signs the alphabetically sorted request params, excluding
+    // file, cloud_name, api_key and signature, with the api_secret appended.
+    const toSign = Object.keys(params)
+      .sort()
+      .map((key) => `${key}=${params[key]}`)
+      .join('&');
+
+    const signature = createHash('sha1').update(`${toSign}${apiSecret}`).digest('hex');
+
+    return { signature, timestamp, cloudName, apiKey, folder: FOLDER };
   }
 }

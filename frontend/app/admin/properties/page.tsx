@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import ImageUpload from '@/components/ImageUpload';
 import { Home, Plus, Trash2, Edit3, Check, X, Building2 } from 'lucide-react';
 
 export default function AdminPropertiesPage() {
@@ -23,7 +24,7 @@ export default function AdminPropertiesPage() {
   const [bathrooms, setBathrooms] = useState('5');
   const [parkingSpaces, setParkingSpaces] = useState('3');
   const [status, setStatus] = useState('AVAILABLE');
-  const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80');
+  const [imageUrl, setImageUrl] = useState('');
 
   const loadProperties = async () => {
     setLoading(true);
@@ -258,13 +259,10 @@ export default function AdminPropertiesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Image URL</label>
-                <input
-                  type="url"
+                <ImageUpload
+                  label="Property Image"
                   value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                  onChange={(url) => setImageUrl(url)}
                 />
               </div>
 

@@ -1,4 +1,13 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+// backend/src/main.ts applies a global 'api' prefix, so this URL must end with /api.
+// Normalized here so a missing /api (or a trailing slash) in NEXT_PUBLIC_API_URL
+// doesn't turn every request into a 404.
+const RAW_API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace(
+  /\/+$/,
+  '',
+);
+const API_BASE_URL = RAW_API_BASE_URL.endsWith('/api')
+  ? RAW_API_BASE_URL
+  : `${RAW_API_BASE_URL}/api`;
 
 export function getAuthToken(): string | null {
   if (typeof window !== 'undefined') {
@@ -66,6 +75,17 @@ export const adminApi = {
     },
     getProfile: async () => {
       return adminFetcher<any>('/auth/profile');
+    },
+  },
+  media: {
+    signature: async () => {
+      return adminFetcher<{
+        signature: string;
+        timestamp: number;
+        cloudName: string;
+        apiKey: string;
+        folder: string;
+      }>('/media/signature');
     },
   },
   properties: {

@@ -1,5 +1,6 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsBoolean, Min, Max } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsBoolean, Min, Max, ValidateNested } from 'class-validator';
 import { ProjectStatus } from '../../common/types/prisma-enums.js';
+import { ImageDto } from '../../common/dto/image.dto.js';
 import { Type } from 'class-transformer';
 
 export class CreateProjectDto {
@@ -49,5 +50,7 @@ export class CreateProjectDto {
   isFeatured?: boolean;
 
   @IsOptional()
-  images?: { url: string; publicId?: string; caption?: string; isPrimary?: boolean }[];
+  @ValidateNested({ each: true })
+  @Type(() => ImageDto)
+  images?: ImageDto[];
 }

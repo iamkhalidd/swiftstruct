@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { adminApi } from '@/lib/adminApi';
+import ImageUpload from '@/components/ImageUpload';
 import { HardHat, Plus, Trash2, X } from 'lucide-react';
 
 export default function AdminProjectsPage() {
@@ -19,7 +20,7 @@ export default function AdminProjectsPage() {
   const [progressPercent, setProgressPercent] = useState('50');
   const [scope, setScope] = useState('Full Civil Works, MEP Systems, Architectural Finishing');
   const [services, setServices] = useState('Building & Construction, Project Management');
-  const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80');
+  const [imageUrl, setImageUrl] = useState('');
 
   const loadProjects = async () => {
     setLoading(true);
@@ -220,13 +221,10 @@ export default function AdminProjectsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Image URL</label>
-                <input
-                  type="url"
+                <ImageUpload
+                  label="Project Image"
                   value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                  onChange={(url) => setImageUrl(url)}
                 />
               </div>
 
