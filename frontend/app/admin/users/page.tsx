@@ -16,6 +16,7 @@ export default function AdminUsersPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [role, setRole] = useState('STAFF');
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -54,6 +55,19 @@ export default function AdminUsersPage() {
       alert(err.message || 'Failed to create user');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleUpdateRole = async (id: string, newRole: string) => {
+    setSavingId(id);
+    try {
+      await adminApi.users.update(id, { role: newRole });
+      await loadUsers();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update role');
+      await loadUsers();
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -104,13 +118,26 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="p-4">{usr.email}</td>
                     <td className="p-4">
-                      <span
-                        className={`px-2.5 py-1 text-[10px] font-extrabold uppercase rounded ${
-                          usr.role === 'ADMIN' ? 'bg-slate-900 text-white' : 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {usr.role}
-                      </span>
+                      {usr.email === 'admin@swiftstruct.com' ? (
+                        <span className="px-2.5 py-1 text-[10px] font-extrabold uppercase rounded bg-slate-900 text-white">
+                          {usr.role}
+                        </span>
+                      ) : (
+                        <select
+                          value={usr.role}
+                          onChange={(e) => handleUpdateRole(usr.id, e.target.value)}
+                          disabled={savingId === usr.id}
+                          title="Change role and access"
+                          className={`px-2 py-1 text-[10px] font-extrabold uppercase rounded cursor-pointer border-0 disabled:opacity-50 ${
+                            usr.role === 'ADMIN'
+                              ? 'bg-slate-900 text-white'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
+                          <option value="STAFF" className="bg-white text-slate-900">STAFF</option>
+                          <option value="ADMIN" className="bg-white text-slate-900">ADMIN</option>
+                        </select>
+                      )}
                     </td>
                     <td className="p-4 text-right">
                       {usr.email !== 'admin@swiftstruct.com' && (

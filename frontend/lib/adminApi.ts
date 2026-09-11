@@ -87,6 +87,20 @@ export const adminApi = {
         folder: string;
       }>('/media/signature');
     },
+    list: async () => {
+      return adminFetcher<{
+        total: number;
+        assets: {
+          publicId: string;
+          url: string;
+          format: string;
+          width: number;
+          height: number;
+          bytes: number;
+          createdAt: string;
+        }[];
+      }>('/media/assets');
+    },
   },
   properties: {
     getAll: async () => {
@@ -193,6 +207,12 @@ export const adminApi = {
     create: async (data: any) => {
       return adminFetcher<any>('/users', {
         method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: any) => {
+      return adminFetcher<any>(`/users/${id}`, {
+        method: 'PATCH',
         body: JSON.stringify(data),
       });
     },

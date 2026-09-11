@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { adminApi } from '@/lib/adminApi';
-import ImageUpload from '@/components/ImageUpload';
+import ImageGalleryUpload, { GalleryImage } from '@/components/ImageGalleryUpload';
 import { Home, Plus, Trash2, Edit3, Check, X, Building2 } from 'lucide-react';
 
 export default function AdminPropertiesPage() {
@@ -24,7 +24,7 @@ export default function AdminPropertiesPage() {
   const [bathrooms, setBathrooms] = useState('5');
   const [parkingSpaces, setParkingSpaces] = useState('3');
   const [status, setStatus] = useState('AVAILABLE');
-  const [imageUrl, setImageUrl] = useState('');
+  const [images, setImages] = useState<GalleryImage[]>([]);
 
   const loadProperties = async () => {
     setLoading(true);
@@ -59,11 +59,12 @@ export default function AdminPropertiesPage() {
         bathrooms: parseInt(bathrooms) || 0,
         parkingSpaces: parseInt(parkingSpaces) || 0,
         status,
-        images: imageUrl ? [{ url: imageUrl, isPrimary: true }] : [],
+        images,
       });
       setShowModal(false);
       setTitle('');
       setDescription('');
+      setImages([]);
       loadProperties();
     } catch (err: any) {
       alert(err.message || 'Failed to create property');
@@ -259,10 +260,10 @@ export default function AdminPropertiesPage() {
               </div>
 
               <div>
-                <ImageUpload
-                  label="Property Image"
-                  value={imageUrl}
-                  onChange={(url) => setImageUrl(url)}
+                <ImageGalleryUpload
+                  label="Property Images"
+                  images={images}
+                  onChange={setImages}
                 />
               </div>
 

@@ -11,4 +11,10 @@ export class MediaController {
   async getSignature() {
     return this.mediaService.getSignature();
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('assets')
+  async listAssets() {
+    return this.mediaService.listAssets();
+  }
 }

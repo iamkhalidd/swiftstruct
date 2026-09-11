@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { adminApi } from '@/lib/adminApi';
-import ImageUpload from '@/components/ImageUpload';
+import ImageGalleryUpload, { GalleryImage } from '@/components/ImageGalleryUpload';
 import { HardHat, Plus, Trash2, X } from 'lucide-react';
+
+const PROJECT_STATUSES = ['UPCOMING', 'ONGOING', 'COMPLETED', 'ARCHIVED'];
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -20,7 +22,8 @@ export default function AdminProjectsPage() {
   const [progressPercent, setProgressPercent] = useState('50');
   const [scope, setScope] = useState('Full Civil Works, MEP Systems, Architectural Finishing');
   const [services, setServices] = useState('Building & Construction, Project Management');
-  const [imageUrl, setImageUrl] = useState('');
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const loadProjects = async () => {
     setLoading(true);
@@ -51,16 +54,29 @@ export default function AdminProjectsPage() {
         progressPercent: parseInt(progressPercent) || 0,
         scope,
         services,
-        images: imageUrl ? [{ url: imageUrl, isPrimary: true }] : [],
+        images,
       });
       setShowModal(false);
       setName('');
       setDescription('');
+      setImages([]);
       loadProjects();
     } catch (err: any) {
       alert(err.message || 'Failed to create project');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    setSavingId(id);
+    try {
+      await adminApi.projects.update(id, { status });
+      await loadProjects();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update project status');
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -115,8 +131,12 @@ export default function AdminProjectsPage() {
                     <td className="p-4">{proj.projectType}</td>
                     <td className="p-4">{proj.location}</td>
                     <td className="p-4">
-                      <span
-                        className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded text-white ${
+                      <select
+                        value={proj.status}
+                        onChange={(e) => handleUpdateStatus(proj.id, e.target.value)}
+                        disabled={savingId === proj.id}
+                        title="Update project status"
+                        className={`px-2 py-1 text-[10px] font-extrabold uppercase rounded text-white border-0 cursor-pointer disabled:opacity-50 ${
                           proj.status === 'COMPLETED'
                             ? 'bg-emerald-600'
                             : proj.status === 'ONGOING'
@@ -124,8 +144,12 @@ export default function AdminProjectsPage() {
                             : 'bg-amber-500'
                         }`}
                       >
-                        {proj.status}
-                      </span>
+                        {PROJECT_STATUSES.map((option) => (
+                          <option key={option} value={option} className="bg-white text-slate-900">
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-4 font-bold text-blue-600">{proj.progressPercent}%</td>
                     <td className="p-4 text-right">
@@ -221,10 +245,10 @@ export default function AdminProjectsPage() {
               </div>
 
               <div>
-                <ImageUpload
-                  label="Project Image"
-                  value={imageUrl}
-                  onChange={(url) => setImageUrl(url)}
+                <ImageGalleryUpload
+                  label="Project Images"
+                  images={images}
+                  onChange={setImages}
                 />
               </div>
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 export const OFFICIAL_SERVICES = [
@@ -90,18 +90,60 @@ Our capabilities include:
 ];
 
 @Injectable()
-export class ServicesService {
+export class ServicesService implements OnModuleInit {
   private readonly logger = new Logger(ServicesService.name);
   private memoryServices: any[] = [...OFFICIAL_SERVICES];
 
   constructor(private prisma: PrismaService) {}
 
+  async onModuleInit() {
+    await this.seedOfficialServices();
+  }
+
+  /**
+   * The service pillars are fixed business content rather than user-generated
+   * data, so seed them on boot. Without this the table stays empty and every
+   * read falls back to the in-memory copy, which makes admin edits look like
+   * they silently disappear.
+   */
+  private async seedOfficialServices() {
+    if (!this.prisma.service) return;
+
+    try {
+      const count = await this.prisma.service.count();
+      if (count > 0) return;
+
+      for (const service of OFFICIAL_SERVICES) {
+        const data = {
+          name: service.name,
+          slug: service.slug,
+          shortDescription: service.shortDescription,
+          content: service.content,
+          imageUrl: service.imageUrl,
+          features: service.features,
+          isPublished: service.isPublished,
+        };
+        await this.prisma.service.upsert({
+          where: { slug: service.slug },
+          update: data,
+          create: data,
+        });
+      }
+      this.logger.log(`Seeded ${OFFICIAL_SERVICES.length} official services.`);
+    } catch (err) {
+      this.logger.warn('Could not seed official services', err);
+    }
+  }
+
   async findAll() {
     if (this.prisma.service) {
       try {
-        return await this.prisma.service.findMany({
+        const services = await this.prisma.service.findMany({
           orderBy: { createdAt: 'asc' },
         });
+        // An empty table is not an error, but returning [] would hide the
+        // content entirely, so fall back to the in-memory copy instead.
+        if (services.length > 0) return services;
       } catch (err) {
         this.logger.warn('Database error in services.findAll', err);
       }
@@ -129,11 +171,22 @@ export class ServicesService {
   }
 
   async update(id: string, data: any) {
+    // Whitelist so a stray field from the client cannot reach Prisma.
+    const allowed = ['name', 'shortDescription', 'content', 'imageUrl', 'features', 'isPublished'];
+    const updateData: Record<string, any> = {};
+    for (const key of allowed) {
+      if (data?.[key] !== undefined) updateData[key] = data[key];
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      throw new BadRequestException('No updatable fields were provided.');
+    }
+
     if (this.prisma.service) {
       try {
         return await this.prisma.service.update({
           where: { id },
-          data,
+          data: updateData,
         });
       } catch (err) {
         this.logger.warn('Database error in service update', err);
@@ -142,7 +195,7 @@ export class ServicesService {
 
     const idx = this.memoryServices.findIndex((s) => s.id === id || s.slug === id);
     if (idx === -1) throw new NotFoundException('Service not found');
-    this.memoryServices[idx] = { ...this.memoryServices[idx], ...data, updatedAt: new Date() };
+    this.memoryServices[idx] = { ...this.memoryServices[idx], ...updateData, updatedAt: new Date() };
     return this.memoryServices[idx];
   }
 }

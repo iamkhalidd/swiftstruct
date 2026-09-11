@@ -47,7 +47,11 @@ export class UsersService {
           select: { id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true },
         });
         return user;
-      } catch {}
+      } catch (err) {
+        // Swallowing this used to fall through to the in-memory store, so the
+        // account looked created but vanished on the next restart.
+        throw new BadRequestException(`Could not create this user: ${this.describeDbError(err)}`);
+      }
     }
 
     const newUser = {
@@ -62,21 +66,27 @@ export class UsersService {
     return newUser;
   }
 
-  async update(id: string, dto: UpdateUserDto) {
+  async update(id: string, dto: UpdateUserDto, requesterId?: string) {
     let updateData: any = { ...dto };
     if (dto.password) {
       updateData.password = await bcrypt.hash(dto.password, 10);
     }
 
+    // Guard against an admin locking themselves out of the portal.
+    if (requesterId && requesterId === id && dto.role && dto.role !== Role.ADMIN) {
+      throw new BadRequestException('You cannot change your own role.');
+    }
+
     if (this.prisma.user) {
       try {
-        const user = await this.prisma.user.update({
+        return await this.prisma.user.update({
           where: { id },
           data: updateData,
           select: { id: true, email: true, firstName: true, lastName: true, role: true, createdAt: true },
         });
-        return user;
-      } catch {}
+      } catch (err) {
+        throw new BadRequestException(`Could not update this user: ${this.describeDbError(err)}`);
+      }
     }
 
     const idx = this.memoryUsers.findIndex((u) => u.id === id);
@@ -85,18 +95,33 @@ export class UsersService {
     return this.memoryUsers[idx];
   }
 
-  async remove(id: string) {
+  async remove(id: string, requesterId?: string) {
+    if (requesterId && requesterId === id) {
+      throw new BadRequestException('You cannot remove your own account.');
+    }
+
     if (this.prisma.user) {
       try {
         await this.prisma.user.delete({ where: { id } });
         return { message: 'User removed' };
-      } catch {}
+      } catch (err) {
+        // Previously this was swallowed, so a failed delete still returned
+        // success and the row reappeared on reload.
+        throw new BadRequestException(`Could not remove this user: ${this.describeDbError(err)}`);
+      }
     }
 
     const idx = this.memoryUsers.findIndex((u) => u.id === id);
-    if (idx !== -1) {
-      this.memoryUsers.splice(idx, 1);
-    }
+    if (idx === -1) throw new NotFoundException('User not found');
+    this.memoryUsers.splice(idx, 1);
     return { message: 'User removed' };
+  }
+
+  private describeDbError(err: unknown): string {
+    const code = (err as { code?: string } | null)?.code;
+    if (code === 'P2025') return 'the user no longer exists';
+    if (code === 'P2003') return 'the user is linked to existing records';
+    if (code === 'P2002') return 'that email address is already in use';
+    return err instanceof Error ? err.message : 'unknown database error';
   }
 }

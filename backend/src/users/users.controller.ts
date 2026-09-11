@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 import { Role } from '../common/types/prisma-enums.js';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,12 +25,16 @@ export class UsersController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser('id') requesterId: string,
+  ) {
+    return this.usersService.update(id, updateUserDto, requesterId);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  async remove(@Param('id') id: string, @CurrentUser('id') requesterId: string) {
+    return this.usersService.remove(id, requesterId);
   }
 }

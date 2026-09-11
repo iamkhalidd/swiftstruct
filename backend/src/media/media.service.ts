@@ -48,4 +48,54 @@ export class MediaService {
 
     return { signature, timestamp, cloudName, apiKey, folder: FOLDER };
   }
+
+  /**
+   * Lists the images that actually exist in the Cloudinary folder so the admin
+   * media library reflects the CDN rather than a static placeholder.
+   */
+  async listAssets(maxResults = 100) {
+    if (!this.isConfigured()) {
+      this.logger.error('Cloudinary credentials are missing; media library is unavailable.');
+      throw new ServiceUnavailableException(
+        'Image uploads are not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET.',
+      );
+    }
+
+    try {
+      const result: any = await cloudinary.api.resources({
+        type: 'upload',
+        resource_type: 'image',
+        prefix: FOLDER,
+        max_results: maxResults,
+      });
+
+      const resources: any[] = result?.resources ?? [];
+
+      return {
+        total: result?.total_count ?? resources.length,
+        assets: resources.map((asset) => ({
+          publicId: asset.public_id,
+          url: asset.secure_url,
+          format: asset.format,
+          width: asset.width,
+          height: asset.height,
+          bytes: asset.bytes,
+          createdAt: asset.created_at,
+        })),
+      };
+    } catch (err: any) {
+      this.logger.error('Could not list Cloudinary assets', err);
+      throw new ServiceUnavailableException(
+        `Could not load the media library: ${err?.message || 'Cloudinary request failed'}`,
+      );
+    }
+  }
+
+  private isConfigured(): boolean {
+    return Boolean(
+      this.configService.get<string>('CLOUDINARY_CLOUD_NAME') &&
+        this.configService.get<string>('CLOUDINARY_API_KEY') &&
+        this.configService.get<string>('CLOUDINARY_API_SECRET'),
+    );
+  }
 }
