@@ -93,8 +93,11 @@ async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
       ...options,
     });
     if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.message || `API Error: ${res.statusText}`);
+      const errData = await res.json().catch(() => null);
+      const detail =
+        errData?.message ??
+        `HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ''} from ${url}`;
+      throw new Error(detail);
     }
     return await res.json();
   } catch (err: any) {

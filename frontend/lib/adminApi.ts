@@ -33,10 +33,20 @@ async function adminFetcher<T>(endpoint: string, options?: RequestInit): Promise
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, { ...options, headers });
+  let res: Response;
+  try {
+    res = await fetch(url, { ...options, headers });
+  } catch {
+    // fetch() rejects on network failure or when CORS blocks the response
+    throw new Error(`Cannot reach the API at ${API_BASE_URL} (network or CORS failure)`);
+  }
+
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.message || `API Error: ${res.statusText}`);
+    const errData = await res.json().catch(() => null);
+    const detail =
+      errData?.message ??
+      `HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ''} from ${url}`;
+    throw new Error(detail);
   }
   return await res.json();
 }
