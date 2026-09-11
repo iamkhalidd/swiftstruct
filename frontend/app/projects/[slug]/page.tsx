@@ -74,7 +74,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
   const primaryImage =
     project.images?.find((i) => i.isPrimary)?.url ||
     project.images?.[0]?.url ||
-    'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80';
+    'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80';
 
   const scopeList = project.scope ? project.scope.split(',').map((s) => s.trim()) : [];
   const servicesList = project.services ? project.services.split(',').map((s) => s.trim()) : [];

@@ -46,7 +46,7 @@ export default async function ServicesPage() {
             >
               <div className={`lg:col-span-5 relative bg-neutral-50 min-h-[280px] ${index % 2 === 1 ? 'lg:order-last' : ''}`}>
                 <img
-                  src={service.imageUrl || 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=800&q=80'}
+                  src={service.imageUrl || 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80'}
                   alt={service.name}
                   className="w-full h-full object-cover"
                 />

@@ -26,7 +26,7 @@ export const INITIAL_PROJECTS = [
     createdAt: new Date(),
     updatedAt: new Date(),
     images: [
-      { id: 'pimg-1-1', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80', isPrimary: true, caption: 'Project Façade' },
+      { id: 'pimg-1-1', url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80', isPrimary: true, caption: 'Project Façade' },
       { id: 'pimg-1-2', url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80', isPrimary: false, caption: 'Construction Site Progress' },
     ],
   },
@@ -66,7 +66,7 @@ export const INITIAL_PROJECTS = [
         projectId: 'proj-2',
         title: 'Superstructure topped out',
         description: 'Final concrete pour on the 10th floor slab completed. MEP first fix commencing across all levels.',
-        imageUrl: 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80',
+        imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80',
         progressPercent: 45,
         createdAt: new Date('2025-01-22'),
       },
@@ -380,6 +380,7 @@ export class ProjectsService {
               imageUrl: dto.imageUrl,
               publicId: dto.publicId,
               progressPercent: dto.progressPercent,
+              ...(dto.createdAt ? { createdAt: new Date(dto.createdAt) } : {}),
             },
           });
 
@@ -412,7 +413,7 @@ export class ProjectsService {
       imageUrl: dto.imageUrl ?? null,
       publicId: dto.publicId ?? null,
       progressPercent: dto.progressPercent ?? null,
-      createdAt: new Date(),
+      createdAt: dto.createdAt ? new Date(dto.createdAt) : new Date(),
     };
 
     project.updates = [update, ...(project.updates ?? [])];

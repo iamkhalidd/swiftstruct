@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsDateString, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -29,4 +29,13 @@ export class CreateProjectUpdateDto {
   @Type(() => Number)
   @IsOptional()
   progressPercent?: number;
+
+  /**
+   * Optional backdating. Without it an update is stamped with the time it was
+   * posted, which is wrong when a team is catching up on record-keeping — the
+   * milestone happened on site days or weeks before anyone logged it.
+   */
+  @IsDateString()
+  @IsOptional()
+  createdAt?: string;
 }

@@ -9,8 +9,15 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  // FRONTEND_URL accepts a comma-separated list, so one build can serve the
+  // deployed frontend and a local dev server at the same time.
+  const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

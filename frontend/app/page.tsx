@@ -27,6 +27,11 @@ const FALLBACK_HERO_IMAGES = [
   'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80',
 ];
 
+// Wide architectural backdrop for the hero. Deliberately a different photograph
+// from the marquee set so the same image never appears twice on one screen.
+const HERO_BACKGROUND =
+  'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=2000&q=80';
+
 export default async function HomePage() {
   let featuredProperties: Property[] = [];
   let featuredProjects: Project[] = [];
@@ -72,8 +77,6 @@ export default async function HomePage() {
 
       {/* Hero Section */}
       <AnimatedMarqueeHero
-        tagline="Integrated Real Estate & Construction Delivery"
-        taglineIcon={<BuildingOffice2Icon className="h-3.5 w-3.5" />}
         title={
           <>
             Property. Construction. <span className="text-neutral-500">Delivered.</span>
@@ -85,6 +88,7 @@ export default async function HomePage() {
         secondaryCtaText="Start a Project"
         secondaryCtaHref="/contact?type=brief"
         images={marqueeImages}
+        backgroundImage={HERO_BACKGROUND}
       />
 
       {/* What We Do Section */}
@@ -255,7 +259,7 @@ export default async function HomePage() {
 
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1000&q=80"
+              src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1000&q=80"
               alt="Project Execution"
               className="rounded-2xl shadow-xl border border-neutral-200 object-cover w-full h-[400px]"
             />

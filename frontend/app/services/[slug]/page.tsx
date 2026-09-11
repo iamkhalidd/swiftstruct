@@ -103,7 +103,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ slug: 
             {/* Image */}
             <div className="rounded-2xl overflow-hidden aspect-[16/9] bg-neutral-50 border border-neutral-200 shadow-sm">
               <img
-                src={service.imageUrl || 'https://images.unsplash.com/photo-1541888946425-d0fbb186a5b7?auto=format&fit=crop&w=1200&q=80'}
+                src={service.imageUrl || 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80'}
                 alt={service.name}
                 className="w-full h-full object-cover"
               />

@@ -1,14 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  type Variants,
+} from 'framer-motion';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 
 interface AnimatedMarqueeHeroProps {
-  tagline: string;
-  taglineIcon?: React.ReactNode;
   title: React.ReactNode;
   description: string;
   ctaText: string;
@@ -16,6 +20,9 @@ interface AnimatedMarqueeHeroProps {
   secondaryCtaText?: string;
   secondaryCtaHref?: string;
   images: string[];
+  /** Full-bleed backdrop photograph. Rendered grayscale and veiled so the
+   *  black type stays legible. Omit for a plain white canvas. */
+  backgroundImage?: string;
   className?: string;
 }
 
@@ -41,10 +48,11 @@ const SECONDARY_CTA =
  * - `framer-motion` animations are JS-driven and are NOT covered by the
  *   `prefers-reduced-motion` CSS block in globals.css, so `useReducedMotion`
  *   is required to honour that preference here.
+ * - The scroll effect is transform-only (`useScroll` + `useTransform`). Scroll
+ *   progress is never lifted into React state, so scrolling does not re-render
+ *   this tree — and every transform is skipped when motion is reduced.
  */
 export const AnimatedMarqueeHero: React.FC<AnimatedMarqueeHeroProps> = ({
-  tagline,
-  taglineIcon,
   title,
   description,
   ctaText,
@@ -52,15 +60,31 @@ export const AnimatedMarqueeHero: React.FC<AnimatedMarqueeHeroProps> = ({
   secondaryCtaText,
   secondaryCtaHref,
   images,
+  backgroundImage,
   className,
 }) => {
   const reduceMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Tracks the hero's own travel: 0 while it fills the viewport, 1 once it has
+  // scrolled fully past the top. Everything is derived from the one motion
+  // value, so this stays a transform-only effect with no re-renders on scroll.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  });
+
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -32]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
+  const gridY = useTransform(scrollYProgress, [0, 1], [0, 28]);
+  const marqueeY = useTransform(scrollYProgress, [0, 1], [0, -18]);
 
   // Duplicate the set so the -50% translation below loops seamlessly.
   const duplicatedImages = [...images, ...images];
 
   return (
     <section
+      ref={sectionRef}
       className={cn(
         'relative w-full min-h-[calc(100vh-5rem)] overflow-hidden',
         'bg-gradient-to-b from-white via-neutral-50 to-neutral-100',
@@ -68,24 +92,39 @@ export const AnimatedMarqueeHero: React.FC<AnimatedMarqueeHeroProps> = ({
         className,
       )}
     >
-      {/* Blueprint dot grid, faded at the edges */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.35] bg-[radial-gradient(#d4d4d4_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
+      {/* Background photograph. Held at grayscale so it sits inside the
+          monochrome palette, behind a vertical veil that is near-opaque across
+          the copy band and tapers to almost nothing at the bottom — so the
+          architecture reads clearly without ever costing the type contrast. */}
+      {backgroundImage && (
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={backgroundImage}
+            alt=""
+            className="h-full w-full object-cover grayscale"
+            loading="eager"
+            fetchPriority="high"
+          />
+          {/* Veil shaped to the layout: near-opaque across the copy band so the
+              black type keeps its contrast, then tapering off so the lower half
+              of the photograph reads clearly around and behind the marquee. */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.88)_15%,rgba(255,255,255,0.86)_50%,rgba(255,255,255,0.50)_72%,rgba(255,255,255,0.24)_100%)]" />
+        </div>
+      )}
 
-      {/* Soft neutral glow behind the headline */}
-      <div className="pointer-events-none absolute -top-24 left-1/2 h-[420px] w-[760px] -translate-x-1/2 rounded-full bg-neutral-200/60 blur-3xl" />
+      {/* Blueprint dot grid, faded at the edges. Drifts slowly downward while
+          the content lifts, which reads as depth without moving much. Held at
+          20% now that the photograph supplies most of the texture. */}
+      <motion.div
+        style={reduceMotion ? undefined : { y: gridY }}
+        className="pointer-events-none absolute inset-0 opacity-[0.2] bg-[radial-gradient(#d4d4d4_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]"
+      />
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pt-20 pb-14 text-center lg:pt-24">
-        {/* Tagline */}
-        <motion.div
-          initial="hidden"
-          animate="show"
-          variants={FADE_IN}
-          className="mb-5 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-neutral-700 shadow-sm backdrop-blur"
-        >
-          {taglineIcon}
-          {tagline}
-        </motion.div>
-
+      <motion.div
+        style={reduceMotion ? undefined : { y: contentY, opacity: contentOpacity }}
+        className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 pt-20 pb-14 text-center lg:pt-24"
+      >
         {/* Main title */}
         <motion.h1
           initial="hidden"
@@ -137,11 +176,14 @@ export const AnimatedMarqueeHero: React.FC<AnimatedMarqueeHeroProps> = ({
             </motion.div>
           )}
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Animated image marquee. In normal flow (not absolute) so it can never
           overlap the CTAs when they stack on narrow viewports. */}
-      <div className="relative z-10 h-56 w-full shrink-0 md:h-80 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]">
+      <motion.div
+        style={reduceMotion ? undefined : { y: marqueeY }}
+        className="relative z-10 h-56 w-full shrink-0 md:h-80 [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_80%,transparent)]"
+      >
         <motion.div
           className="flex h-full items-center gap-5"
           animate={reduceMotion ? undefined : { x: ['0%', '-50%'] }}
@@ -165,7 +207,7 @@ export const AnimatedMarqueeHero: React.FC<AnimatedMarqueeHeroProps> = ({
             </div>
           ))}
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 };
