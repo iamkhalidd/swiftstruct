@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProjectCard from '@/components/ProjectCard';
 import { api, Project } from '@/lib/api';
-import { HardHat, Filter } from 'lucide-react';
+import { WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -33,20 +33,20 @@ export default function ProjectsPage() {
   }, [statusFilter]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900">
       <Navbar />
 
       {/* Header Banner */}
-      <section className="bg-slate-900 text-white py-14 border-b border-slate-800">
+      <section className="bg-white py-14 border-b border-neutral-200">
         <div className="container-custom">
           <div className="max-w-2xl space-y-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
+            <span className="text-xs font-bold uppercase tracking-widest text-neutral-500">
               Project Delivery & Contracting
             </span>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-900">
               Construction & Projects Portfolio
             </h1>
-            <p className="text-slate-300 text-sm">
+            <p className="text-neutral-600 text-sm">
               Explore our track record across turnkey residential developments, commercial high-rises, structural renovations, and civil engineering projects.
             </p>
           </div>
@@ -62,8 +62,8 @@ export default function ProjectsPage() {
               onClick={() => setStatusFilter('')}
               className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
                 statusFilter === ''
-                  ? 'bg-slate-900 text-white shadow'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-black text-white shadow'
+                  : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-100'
               }`}
             >
               All Projects
@@ -72,8 +72,8 @@ export default function ProjectsPage() {
               onClick={() => setStatusFilter('COMPLETED')}
               className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
                 statusFilter === 'COMPLETED'
-                  ? 'bg-emerald-600 text-white shadow'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-black text-white shadow'
+                  : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-100'
               }`}
             >
               Completed
@@ -82,8 +82,8 @@ export default function ProjectsPage() {
               onClick={() => setStatusFilter('ONGOING')}
               className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
                 statusFilter === 'ONGOING'
-                  ? 'bg-blue-600 text-white shadow'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-black text-white shadow'
+                  : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-100'
               }`}
             >
               Ongoing Construction
@@ -92,8 +92,8 @@ export default function ProjectsPage() {
               onClick={() => setStatusFilter('UPCOMING')}
               className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition ${
                 statusFilter === 'UPCOMING'
-                  ? 'bg-amber-500 text-white shadow'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                  ? 'bg-black text-white shadow'
+                  : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-100'
               }`}
             >
               Upcoming
@@ -103,8 +103,8 @@ export default function ProjectsPage() {
           {/* Loading */}
           {loading && (
             <div className="py-20 text-center space-y-3">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent" />
-              <p className="text-slate-500 text-sm font-medium">Loading project portfolio...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-black border-t-transparent" />
+              <p className="text-neutral-500 text-sm font-medium">Loading project portfolio...</p>
             </div>
           )}
 
@@ -117,10 +117,10 @@ export default function ProjectsPage() {
 
           {/* Empty */}
           {!loading && !error && projects.length === 0 && (
-            <div className="bg-white p-12 text-center rounded-2xl border border-slate-200 max-w-lg mx-auto my-12 space-y-4">
-              <HardHat className="w-12 h-12 text-slate-300 mx-auto" />
-              <h3 className="text-xl font-bold text-slate-800">No projects found</h3>
-              <p className="text-slate-500 text-sm">
+            <div className="bg-white p-12 text-center rounded-2xl border border-neutral-200 max-w-lg mx-auto my-12 space-y-4">
+              <WrenchScrewdriverIcon className="w-12 h-12 text-neutral-300 mx-auto" />
+              <h3 className="text-xl font-bold text-neutral-900">No projects found</h3>
+              <p className="text-neutral-500 text-sm">
                 No projects found in this category.
               </p>
             </div>

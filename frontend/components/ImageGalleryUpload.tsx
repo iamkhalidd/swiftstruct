@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ImagePlus, Loader2, Star, Trash2 } from 'lucide-react';
+import { PhotoIcon, ArrowPathIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { uploadImage } from '@/lib/cloudinary';
 
 export interface GalleryImage {
@@ -67,8 +67,8 @@ export default function ImageGalleryUpload({
 
   return (
     <div>
-      <label className="block text-xs font-bold text-slate-700 mb-1">
-        {label} <span className="font-medium text-slate-500">({images.length} uploaded)</span>
+      <label className="block text-xs font-bold text-neutral-700 mb-1">
+        {label} <span className="font-medium text-neutral-500">({images.length} uploaded)</span>
       </label>
 
       <input
@@ -84,7 +84,7 @@ export default function ImageGalleryUpload({
         {images.map((img, index) => (
           <div
             key={`${img.publicId ?? img.url}-${index}`}
-            className="relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50"
+            className="relative group rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50"
           >
             <img
               src={img.url}
@@ -93,21 +93,21 @@ export default function ImageGalleryUpload({
             />
 
             {img.isPrimary && (
-              <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-blue-600 text-white text-[9px] font-extrabold uppercase rounded">
+              <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-black text-white text-[9px] font-extrabold uppercase rounded">
                 Primary
               </span>
             )}
 
-            <div className="absolute inset-x-0 bottom-0 flex justify-between bg-slate-900/70 opacity-0 group-hover:opacity-100 transition p-1">
+            <div className="absolute inset-x-0 bottom-0 flex justify-between bg-black/40 opacity-0 group-hover:opacity-100 transition p-1">
               {!img.isPrimary && (
                 <button
                   type="button"
                   onClick={() => makePrimary(index)}
                   aria-label={`Make image ${index + 1} the primary image`}
                   title="Make primary"
-                  className="p-2 text-white hover:text-blue-300"
+                  className="p-2 text-white hover:text-neutral-300"
                 >
-                  <Star className="w-3.5 h-3.5" aria-hidden="true" />
+                  <StarIcon className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               )}
               <button
@@ -117,7 +117,7 @@ export default function ImageGalleryUpload({
                 title="Remove"
                 className="p-2 text-white hover:text-red-400 ml-auto"
               >
-                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                <TrashIcon className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -127,12 +127,12 @@ export default function ImageGalleryUpload({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="h-24 border-2 border-dashed border-slate-300 rounded-lg text-[10px] font-bold text-slate-500 hover:border-blue-500 hover:text-blue-600 transition flex flex-col items-center justify-center gap-1 disabled:opacity-50"
+          className="h-24 border-2 border-dashed border-neutral-300 rounded-lg text-[10px] font-bold text-neutral-500 hover:border-black hover:text-neutral-900 transition flex flex-col items-center justify-center gap-1 disabled:opacity-50"
         >
           {uploading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <ArrowPathIcon className="w-4 h-4 animate-spin" />
           ) : (
-            <ImagePlus className="w-4 h-4" />
+            <PhotoIcon className="w-4 h-4" />
           )}
           {uploading ? 'Uploading…' : 'Add images'}
         </button>

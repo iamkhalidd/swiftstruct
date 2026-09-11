@@ -4,20 +4,20 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  Building2,
-  LayoutDashboard,
-  Home,
-  HardHat,
-  Inbox,
-  Briefcase,
-  BookOpen,
-  Users,
-  Image,
-  LogOut,
-  Menu,
-  X,
-  UserCheck,
-} from 'lucide-react';
+  Squares2X2Icon,
+  HomeIcon,
+  WrenchScrewdriverIcon,
+  InboxIcon,
+  BriefcaseIcon,
+  BookOpenIcon,
+  UsersIcon,
+  PhotoIcon,
+  ArrowRightOnRectangleIcon,
+  Bars3Icon,
+  XMarkIcon,
+  UserCircleIcon,
+} from '@heroicons/react/24/outline';
+import { SwiftStructMark } from '@/components/icons/BrandIcons';
 import { removeAuthToken, getAuthToken } from '@/lib/adminApi';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -53,28 +53,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   const navItems = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Properties', href: '/admin/properties', icon: Home },
-    { name: 'Projects', href: '/admin/projects', icon: HardHat },
-    { name: 'Enquiries & Leads', href: '/admin/enquiries', icon: Inbox },
-    { name: 'Services', href: '/admin/services', icon: Briefcase },
-    { name: 'Insights', href: '/admin/insights', icon: BookOpen },
-    { name: 'Testimonials', href: '/admin/testimonials', icon: UserCheck },
-    { name: 'Media Library', href: '/admin/media', icon: Image },
-    { name: 'Users & Staff', href: '/admin/users', icon: Users },
+    { name: 'Dashboard', href: '/admin/dashboard', icon: Squares2X2Icon },
+    { name: 'Properties', href: '/admin/properties', icon: HomeIcon },
+    { name: 'Projects', href: '/admin/projects', icon: WrenchScrewdriverIcon },
+    { name: 'Enquiries & Leads', href: '/admin/enquiries', icon: InboxIcon },
+    { name: 'Services', href: '/admin/services', icon: BriefcaseIcon },
+    { name: 'Insights', href: '/admin/insights', icon: BookOpenIcon },
+    { name: 'Testimonials', href: '/admin/testimonials', icon: UserCircleIcon },
+    { name: 'Media Library', href: '/admin/media', icon: PhotoIcon },
+    { name: 'Users & Staff', href: '/admin/users', icon: UsersIcon },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100 flex text-slate-900">
+    <div className="min-h-screen bg-neutral-50 flex text-neutral-900">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-slate-900 text-white border-r border-slate-800 shrink-0">
-        <div className="h-16 px-6 flex items-center gap-3 border-b border-slate-800">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white">
-            <Building2 className="w-5 h-5" />
+      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-neutral-200 shrink-0">
+        <div className="h-16 px-6 flex items-center gap-3 border-b border-neutral-200">
+          <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center font-bold text-white">
+            <SwiftStructMark className="w-5 h-5" />
           </div>
           <div>
             <span className="font-extrabold text-sm tracking-tight block">SWIFTSTRUCT</span>
-            <span className="text-[10px] text-slate-400 uppercase font-semibold">Admin CMS</span>
+            <span className="text-[10px] text-neutral-500 uppercase font-semibold">Admin CMS</span>
           </div>
         </div>
 
@@ -88,8 +88,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 href={item.href}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-bold transition ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-black text-white shadow-sm'
+                    : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -99,18 +99,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-800 space-y-3">
+        <div className="p-4 border-t border-neutral-200 space-y-3">
           {user && (
             <div className="text-xs">
-              <span className="block text-slate-400">Signed in as</span>
-              <span className="font-bold text-white truncate block">{user.email}</span>
+              <span className="block text-neutral-500">Signed in as</span>
+              <span className="font-bold text-neutral-900 truncate block">{user.email}</span>
             </div>
           )}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white rounded-lg text-xs font-bold transition"
+            className="w-full flex items-center justify-center gap-2 py-2 bg-neutral-100 hover:bg-red-600 text-neutral-700 hover:text-white rounded-lg text-xs font-bold transition"
           >
-            <LogOut className="w-3.5 h-3.5" /> Logout
+            <ArrowRightOnRectangleIcon className="w-3.5 h-3.5" /> Logout
           </button>
         </div>
       </aside>
@@ -118,38 +118,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between">
+        <header className="h-16 bg-white border-b border-neutral-200 px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2 text-slate-600 hover:text-slate-900"
+              className="lg:hidden p-2 text-neutral-600 hover:text-neutral-900"
             >
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
             </button>
-            <h1 className="font-bold text-slate-900 text-base">SwiftStruct Management System</h1>
+            <h1 className="font-bold text-neutral-900 text-base">SwiftStruct Management System</h1>
           </div>
 
-          <Link href="/" target="_blank" className="text-xs font-bold text-blue-600 hover:underline">
+          <Link
+            href="/"
+            target="_blank"
+            className="text-xs font-bold text-neutral-900 hover:underline"
+          >
             View Public Website &rarr;
           </Link>
         </header>
 
         {/* Mobile Navigation Drawer */}
         {mobileOpen && (
-          <div className="lg:hidden bg-slate-900 text-white px-4 py-4 space-y-2 border-b border-slate-800">
+          <div className="lg:hidden bg-white text-neutral-900 px-4 py-4 space-y-2 border-b border-neutral-200">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className="block px-3 py-2 text-xs font-bold rounded hover:bg-slate-800"
+                className="block px-3 py-2 text-xs font-bold rounded hover:bg-neutral-100"
               >
                 {item.name}
               </Link>
             ))}
             <button
               onClick={handleLogout}
-              className="w-full text-left px-3 py-2 text-xs font-bold text-red-400 hover:bg-slate-800"
+              className="w-full text-left px-3 py-2 text-xs font-bold text-red-600 hover:bg-neutral-100"
             >
               Logout
             </button>
