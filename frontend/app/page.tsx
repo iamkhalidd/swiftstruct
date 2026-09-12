@@ -37,16 +37,27 @@ export default async function HomePage() {
   let featuredProjects: Project[] = [];
   let latestInsights: InsightArticle[] = [];
 
+  // These sections are driven by the `isFeatured` flag the admin sets. If
+  // nothing is flagged yet, fall back to the newest records so the section is
+  // never empty on a fresh install.
   try {
-    const propertiesRes = await api.properties.getAll({ limit: 3 });
-    featuredProperties = propertiesRes.data || [];
+    const featuredRes = await api.properties.getAll({ limit: 3, isFeatured: true });
+    featuredProperties = featuredRes.data || [];
+    if (featuredProperties.length === 0) {
+      const latestRes = await api.properties.getAll({ limit: 3 });
+      featuredProperties = latestRes.data || [];
+    }
   } catch {
     // Graceful fallback
   }
 
   try {
-    const projectsRes = await api.projects.getAll({ limit: 3 });
-    featuredProjects = projectsRes.data || [];
+    const featuredRes = await api.projects.getAll({ limit: 3, isFeatured: true });
+    featuredProjects = featuredRes.data || [];
+    if (featuredProjects.length === 0) {
+      const latestRes = await api.projects.getAll({ limit: 3 });
+      featuredProjects = latestRes.data || [];
+    }
   } catch {
     // Graceful fallback
   }

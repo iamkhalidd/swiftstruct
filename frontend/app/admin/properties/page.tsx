@@ -15,6 +15,8 @@ const PROPERTY_STATUSES = [
   'ARCHIVED',
 ];
 
+const CURRENCIES = ['NGN', 'USD', 'GBP', 'EUR'];
+
 /**
  * Monochrome status ramp: the darker the chip, the more actionable the listing.
  * Available is the strongest signal, sold/rented fade out, draft and archived
@@ -59,6 +61,10 @@ export default function AdminPropertiesPage() {
   const [status, setStatus] = useState('AVAILABLE');
   const [totalUnits, setTotalUnits] = useState('1');
   const [availableUnits, setAvailableUnits] = useState('1');
+  const [currency, setCurrency] = useState('NGN');
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [amenities, setAmenities] = useState('');
+  const [features, setFeatures] = useState('');
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -86,6 +92,10 @@ export default function AdminPropertiesPage() {
     setImages([]);
     setTotalUnits('1');
     setAvailableUnits('1');
+    setCurrency('NGN');
+    setIsFeatured(false);
+    setAmenities('');
+    setFeatures('');
   };
 
   const openCreate = () => {
@@ -109,6 +119,10 @@ export default function AdminPropertiesPage() {
     setStatus(prop.status ?? 'AVAILABLE');
     setTotalUnits(String(prop.totalUnits ?? 1));
     setAvailableUnits(String(prop.availableUnits ?? prop.totalUnits ?? 1));
+    setCurrency(prop.currency ?? 'NGN');
+    setIsFeatured(Boolean(prop.isFeatured));
+    setAmenities(prop.amenities ?? '');
+    setFeatures(prop.features ?? '');
     setImages(
       (prop.images ?? []).map((img: any, i: number) => ({
         url: img.url,
@@ -135,6 +149,7 @@ export default function AdminPropertiesPage() {
       propertyType,
       listingType,
       price: parseFloat(price) || 0,
+      currency,
       location,
       city,
       state,
@@ -142,8 +157,11 @@ export default function AdminPropertiesPage() {
       bathrooms: parseInt(bathrooms) || 0,
       parkingSpaces: parseInt(parkingSpaces) || 0,
       status,
+      isFeatured,
       totalUnits: total,
       availableUnits: available,
+      amenities: amenities.trim() || undefined,
+      features: features.trim() || undefined,
       images,
     };
 
@@ -301,7 +319,7 @@ export default function AdminPropertiesPage() {
       {/* Modal - Create Property */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-3xl w-full p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
               <h2 className="text-xl font-bold text-neutral-900">
                 {editingId ? 'Edit Property Listing' : 'Add New Property Listing'}
@@ -358,11 +376,9 @@ export default function AdminPropertiesPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-neutral-700 mb-1">
-                    Price (NGN) *
-                  </label>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">Price *</label>
                   <input
                     type="number"
                     required
@@ -372,6 +388,23 @@ export default function AdminPropertiesPage() {
                   />
                 </div>
                 <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">Currency</label>
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm"
+                  >
+                    {CURRENCIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
                   <label className="block text-xs font-bold text-neutral-700 mb-1">Location *</label>
                   <input
                     type="text"
@@ -379,6 +412,28 @@ export default function AdminPropertiesPage() {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="e.g. Lekki Phase 1"
+                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">City</label>
+                  <input
+                    type="text"
+                    required
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="e.g. Lekki"
+                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">State</label>
+                  <input
+                    type="text"
+                    required
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    placeholder="e.g. Lagos"
                     className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm"
                   />
                 </div>
@@ -449,11 +504,63 @@ export default function AdminPropertiesPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-neutral-700 mb-1">Status</label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm"
+                  >
+                    {PROPERTY_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <label className="w-full inline-flex items-center gap-2.5 px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isFeatured}
+                      onChange={(e) => setIsFeatured(e.target.checked)}
+                      className="w-4 h-4 accent-neutral-900"
+                    />
+                    <span className="text-xs font-bold text-neutral-700">
+                      Featured on the homepage
+                    </span>
+                  </label>
+                </div>
+              </div>
+
               <div>
                 <ImageGalleryUpload
                   label="Property Images"
                   images={images}
                   onChange={setImages}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-1">Amenities</label>
+                <textarea
+                  rows={2}
+                  value={amenities}
+                  onChange={(e) => setAmenities(e.target.value)}
+                  placeholder="Comma-separated, e.g. Swimming Pool, 24/7 Security, Fitted Kitchen"
+                  className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-neutral-700 mb-1">Features</label>
+                <textarea
+                  rows={2}
+                  value={features}
+                  onChange={(e) => setFeatures(e.target.value)}
+                  placeholder="Comma-separated, e.g. En-suite Bedrooms, Walk-in Closet, Boys Quarters"
+                  className="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm"
                 />
               </div>
 

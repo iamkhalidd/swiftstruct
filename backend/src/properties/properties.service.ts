@@ -174,6 +174,7 @@ export class PropertiesService {
       bedrooms,
       bathrooms,
       status,
+      isFeatured,
       search,
       page = 1,
       limit = 12,
@@ -183,6 +184,7 @@ export class PropertiesService {
       try {
         const where: any = {};
         if (listingType) where.listingType = listingType;
+        if (isFeatured !== undefined) where.isFeatured = isFeatured;
         if (propertyType) where.propertyType = { contains: propertyType, mode: 'insensitive' };
         if (location) where.location = { contains: location, mode: 'insensitive' };
         if (status) where.status = status;
@@ -226,6 +228,9 @@ export class PropertiesService {
     if (propertyType) filtered = filtered.filter((p) => p.propertyType.toLowerCase().includes(propertyType.toLowerCase()));
     if (location) filtered = filtered.filter((p) => p.location.toLowerCase().includes(location.toLowerCase()));
     if (status) filtered = filtered.filter((p) => p.status === status);
+    if (isFeatured !== undefined) {
+      filtered = filtered.filter((p) => Boolean(p.isFeatured) === isFeatured);
+    }
     if (minPrice) filtered = filtered.filter((p) => p.price >= minPrice);
     if (maxPrice) filtered = filtered.filter((p) => p.price <= maxPrice);
     if (bedrooms) filtered = filtered.filter((p) => p.bedrooms >= bedrooms);

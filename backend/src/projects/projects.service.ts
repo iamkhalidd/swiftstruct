@@ -138,13 +138,14 @@ export class ProjectsService {
   }
 
   async findAll(query: ProjectQueryDto) {
-    const { status, projectType, location, search, page = 1, limit = 12 } = query;
+    const { status, projectType, location, isFeatured, search, page = 1, limit = 12 } = query;
 
     if (this.prisma.project) {
       try {
         const where: any = {};
         if (status) where.status = status;
         else where.status = { not: ProjectStatus.ARCHIVED };
+        if (isFeatured !== undefined) where.isFeatured = isFeatured;
 
         if (projectType) where.projectType = { contains: projectType, mode: 'insensitive' };
         if (location) where.location = { contains: location, mode: 'insensitive' };
@@ -174,6 +175,9 @@ export class ProjectsService {
 
     let filtered = [...this.memoryProjects];
     if (status) filtered = filtered.filter((p) => p.status === status);
+    if (isFeatured !== undefined) {
+      filtered = filtered.filter((p) => Boolean(p.isFeatured) === isFeatured);
+    }
     if (projectType) filtered = filtered.filter((p) => p.projectType.toLowerCase().includes(projectType.toLowerCase()));
     if (location) filtered = filtered.filter((p) => p.location.toLowerCase().includes(location.toLowerCase()));
 

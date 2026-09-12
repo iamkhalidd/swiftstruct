@@ -1,6 +1,6 @@
-import { IsEnum, IsOptional, IsString, IsNumber, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString, IsNumber, Min } from 'class-validator';
 import { ListingType, PropertyStatus } from '../../common/types/prisma-enums.js';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class PropertyQueryDto {
   @IsEnum(ListingType)
@@ -46,6 +46,17 @@ export class PropertyQueryDto {
   @IsEnum(PropertyStatus)
   @IsOptional()
   status?: PropertyStatus;
+
+  /**
+   * Reads the raw query string via `obj[key]`. The global `enableImplicitConversion`
+   * has already coerced this value to a boolean by the time the callback runs, and
+   * `Boolean('false')` is true — so checking `value` would make
+   * `?isFeatured=false` behave as `?isFeatured=true`.
+   */
+  @Transform(({ obj, key }) => obj[key] === 'true' || obj[key] === true)
+  @IsBoolean()
+  @IsOptional()
+  isFeatured?: boolean;
 
   @IsString()
   @IsOptional()
