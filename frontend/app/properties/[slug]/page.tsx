@@ -23,6 +23,9 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Currently selected gallery image. Null means "use the primary image".
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+
   // Form State
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -112,6 +115,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
   }
 
   const primaryImage =
+    activeImage ||
     property.images?.find((i) => i.isPrimary)?.url ||
     property.images?.[0]?.url ||
     'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80';
@@ -150,9 +154,10 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
           <div className="lg:col-span-8">
             <div className="rounded-2xl overflow-hidden aspect-[16/10] bg-neutral-100 border border-neutral-200 shadow-2xl relative">
               <img
+                key={primaryImage}
                 src={primaryImage}
                 alt={property.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover animate-[galleryFadeIn_0.35s_ease-out]"
               />
               <div className="absolute top-4 left-4 flex gap-2">
                 <span
@@ -171,11 +176,31 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ slug:
             {/* Thumbnail Row if multiple images */}
             {property.images && property.images.length > 1 && (
               <div className="grid grid-cols-4 gap-3 mt-4">
-                {property.images.map((img) => (
-                  <div key={img.id} className="rounded-lg overflow-hidden aspect-video border border-neutral-200 bg-neutral-100">
-                    <img src={img.url} alt="Gallery" className="w-full h-full object-cover" />
-                  </div>
-                ))}
+                {property.images.map((img) => {
+                  const isActive = primaryImage === img.url;
+                  return (
+                    <button
+                      key={img.id}
+                      type="button"
+                      onClick={() => setActiveImage(img.url)}
+                      aria-label={`View image of ${property.title}`}
+                      aria-current={isActive}
+                      className={`rounded-lg overflow-hidden aspect-video border bg-neutral-100 cursor-pointer transition focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${
+                        isActive
+                          ? 'border-black ring-2 ring-black'
+                          : 'border-neutral-200 hover:border-neutral-400'
+                      }`}
+                    >
+                      <img
+                        src={img.url}
+                        alt="Gallery"
+                        className={`w-full h-full object-cover transition-opacity ${
+                          isActive ? 'opacity-100' : 'opacity-70 hover:opacity-100'
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
