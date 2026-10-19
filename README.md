@@ -69,14 +69,6 @@ swiftstruct/
 
 ---
 
-## 🔑 Default Admin Credentials
-
-- **Email**: `admin@swiftstruct.com`
-- **Password**: `Admin123!`
-- **Portal URL**: `/admin/login`
-
----
-
 ## 🚀 Environment Setup
 
 ### Backend (`backend/.env`)
